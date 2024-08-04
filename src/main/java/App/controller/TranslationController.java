@@ -1,4 +1,4 @@
-package App.contoller;
+package App.controller;
 
 import App.exception.TranslationException;
 import App.service.TranslationService;
@@ -28,11 +28,10 @@ public class TranslationController {
         String userIp = httpServletRequest.getRemoteAddr();
 
         try {
-            String translatedText = translationService.translateText(text, sourceLanguageCode, targetLanguageCode);
+            String translatedText = translationService.translateText(userIp, text, sourceLanguageCode, targetLanguageCode);
             return ResponseEntity.ok(translatedText);
         } catch (TranslationException e) {
             return new ResponseEntity<>(e.getMessage(), e.getStatus());
         }
-//        return translationService.translateText(text, sourceLanguageCode, targetLanguageCode);//, userIp
     }
 }

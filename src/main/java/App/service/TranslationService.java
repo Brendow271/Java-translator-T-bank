@@ -1,6 +1,8 @@
 package App.service;
 
 import App.exception.TranslationException;
+import App.model.TranslationRecord;
+import App.repository.TranslationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,10 @@ public class TranslationService {
     private final ObjectMapper objectMapper;
     private final Semaphore semaphore;
     private final ScheduledExecutorService scheduler;
+    private final TranslationRepository translationRepository;
 
     @Autowired
-    public TranslationService(RestTemplate restTemplate) {
+    public TranslationService(RestTemplate restTemplate, TranslationRepository translationRepository) {
         this.yandexApiKey = "t1.9euelZrOmJTHxsaQzcuUx8iMm4yLje3rnpWanseNl5LNz5zKkZyWnZidkczl9fdkQEJK-e9JGsTd9fckbz9K-e9JGsTN5_XrnpWaz5yayJGNzMfIl4-TjJvGzpXv_MXrnpWaz5yayJGNzMfIl4-TjJvGzpU.sC57OEUuuCUp86Alvn5yfg_eUkWzSo2zZRbVKXdL0T1MjxW28FOJvFrjRpGuUSAzNvNLsnjIpySb_lKkMKsGBQ";
         this.restTemplate = restTemplate;
         this.idFolder = "b1g9l2de1r3n3ivlesju";
@@ -34,9 +37,10 @@ public class TranslationService {
         this.objectMapper = new ObjectMapper();
         this.semaphore = new Semaphore(20);
         this.scheduler = Executors.newScheduledThreadPool(1);
+        this.translationRepository = translationRepository;
     }
 
-    public String translateText(String text, String sourceLanguageCode, String targetLanguageCode) {//, String userIp
+    public String translateText(String userIp, String text, String sourceLanguageCode, String targetLanguageCode) {
 
         List<Future<String>> futures = List.of(text.split("\\s+")).stream()
                 .map(word -> executorService.submit(() -> {
@@ -48,7 +52,6 @@ public class TranslationService {
                     }
                 }))
                 .collect(Collectors.toList());
-
 
         StringBuilder translatedText = new StringBuilder();
 
@@ -66,6 +69,7 @@ public class TranslationService {
         }
 
         String result = translatedText.toString().trim();
+        saveTranslationRecord(userIp, text, result);
         return result;
 
     }
@@ -99,8 +103,6 @@ public class TranslationService {
             System.out.println(e);
             throw new TranslationException("Error: An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-//        ResponseEntity<String> response = restTemplate.exchange(apiUrl, HttpMethod.POST, entity, String.class);
-//        return parseTranslationResponse(response.getBody());
     }
 
     private String parseTranslationResponse(String response) {
@@ -116,5 +118,10 @@ public class TranslationService {
             e.printStackTrace();
             throw new TranslationException("Error: Failed to parse the translation response.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private void saveTranslationRecord(String userIp, String inputText, String translatedText) {
+        TranslationRecord record = new TranslationRecord(userIp, inputText, translatedText);
+        translationRepository.save(record);
     }
 }
