@@ -20,10 +20,10 @@ public class TranslationController {
 
     @PostMapping
     public String translate(@RequestBody Map<String, String> request, HttpServletRequest httpServletRequest) {
-        String text = request.get("text");
-        String sourceLang = request.get("sourceLang");
-        String targetLang = request.get("targetLang");
+        String text = request.get("texts");
+        String sourceLanguageCode = request.get("sourceLanguageCode");
+        String targetLanguageCode = request.get("targetLanguageCode");
         String userIp = httpServletRequest.getRemoteAddr();
-        return translationService.translateText(text, sourceLang, targetLang, userIp);
+        return translationService.translateText(text, sourceLanguageCode, targetLanguageCode);//, userIp
     }
 }
