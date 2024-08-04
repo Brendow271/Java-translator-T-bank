@@ -6,6 +6,7 @@ import App.repository.TranslationRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -29,15 +30,18 @@ public class TranslationService {
     private final TranslationRepository translationRepository;
 
     @Autowired
-    public TranslationService(RestTemplate restTemplate, TranslationRepository translationRepository) {
-        this.yandexApiKey = "t1.9euelZrOmJTHxsaQzcuUx8iMm4yLje3rnpWanseNl5LNz5zKkZyWnZidkczl9fdkQEJK-e9JGsTd9fckbz9K-e9JGsTN5_XrnpWaz5yayJGNzMfIl4-TjJvGzpXv_MXrnpWaz5yayJGNzMfIl4-TjJvGzpU.sC57OEUuuCUp86Alvn5yfg_eUkWzSo2zZRbVKXdL0T1MjxW28FOJvFrjRpGuUSAzNvNLsnjIpySb_lKkMKsGBQ";
+    public TranslationService(RestTemplate restTemplate,
+                              @Value("${yandex.api.key}") String yandexApiKey,
+                              @Value("${yandex.folder.id}") String idFolder,
+                              TranslationRepository translationRecordRepository) {
         this.restTemplate = restTemplate;
-        this.idFolder = "b1g9l2de1r3n3ivlesju";
+        this.yandexApiKey = yandexApiKey;
+        this.idFolder = idFolder;
         this.executorService = Executors.newFixedThreadPool(10);
         this.objectMapper = new ObjectMapper();
         this.semaphore = new Semaphore(20);
         this.scheduler = Executors.newScheduledThreadPool(1);
-        this.translationRepository = translationRepository;
+        this.translationRepository = translationRecordRepository;
     }
 
     public String translateText(String userIp, String text, String sourceLanguageCode, String targetLanguageCode) {
