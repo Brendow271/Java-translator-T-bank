@@ -1,14 +1,20 @@
 # Java-translator-T-bank
 
+Веб-приложение на языке Java, предназначенное для перевода набора слов с одного языка на другой с использованием Yandex Translate API. 
+
+Приложение принимает строку слов, исходный и целевой языки в качестве параметров, и возвращает переведённую строку.
+
+Перевод отдельных слов осуществляется параллельно (потоками). История запросов сохраняется в реляционной базе данных.
+
 ## Структура проекта Java-translator-T-bank
 
 ### 1. Используемые технологии
 
-- Spring Boot 2.0 и выше (Spring Web, Spring Data JPA)
-- H2 Database (JDBC)
-- Maven
-- Yandex Translate API
-- RestTemplate
+- [Spring Boot 2.0 и выше (Spring Web, Spring Data JPA)](https://docs.spring.io/spring-boot/docs/2.0.0.RELEASE/reference/htmlsingle/)
+- [H2 Database (JDBC)](https://h2database.github.io/html/main.html)
+- [Maven](https://maven.apache.org/)
+- [Yandex Translate API](https://yandex.cloud/ru/docs/translate/quickstart)
+- [RestTemplate](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/client/RestTemplate.html)
 
 ### 2. Файловая структура основной директории проекта
 
@@ -41,6 +47,39 @@ Java-translator-T-bank/
 ├── mvnw.cmd
 └── pom.xml
 ```
+
+### 3. Эндпоинт translate
+
+#### HTTP-запрос
+
+```bash
+POST http://localhost:8082/api/translate
+```
+
+#### Параметры в теле запроса
+
+```json
+{
+  "sourceLanguageCode": "string",
+  "targetLanguageCode": "string",
+  "texts": "string"
+}
+```
+
+| Поле | Описание |
+| --- | --- |
+| sourceLanguageCode | **string** Обязательное поле. [Язык](https://yandex.cloud/ru/docs/translate/concepts/supported-languages), на котором написан исходный текст (например, ```ru```). Максимальная длина строки в символах — 3. |
+| targetLanguageCode | **string** Обязательное поле. [Язык](https://yandex.cloud/ru/docs/translate/concepts/supported-languages), на который переводится текст (например, ```en```). Максимальная длина строки в символах — 3. |
+| texts | **string** Обязательное поле. Строка для перевода. Максимальная общая длина строки составляет 100000 символов. Должен содержать хотя бы один элемент. |
+
+#### Тело ответа: строка
+
+| Код ответа | Сообщение | Описание |
+| --- | --- | --- |
+| 200 | OK  | Запрос выполнен успешно |
+| 400 | Bad Request | Некорректный запрос  |
+| 401 | Unauthorized | Предоставленный API-ключ неверный или отсутствует |
+| 500 | Internal Server Error | Ошибка на стороне сервера |
 
 ## Запуск и тестирование
 
