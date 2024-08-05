@@ -13,10 +13,10 @@ public class TranslationRecord {
     @Column(name = "user_ip", nullable = false)
     private String userIp;
 
-    @Column(name = "input_text", nullable = false)
+    @Column(name = "input_text", length = 100000, nullable = false)
     private String inputText;
 
-    @Column(name = "translated_text", nullable = false)
+    @Column(name = "translated_text", length = 100000, nullable = false)
     private String translatedText;
 
 
